@@ -91,14 +91,14 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         // 设置用户注册时间
 
-        employee.setCreateTime(LocalDateTime.now());
-        employee.setUpdateTime(LocalDateTime.now());
-
-        //设置操作用户id
-
-        Long curId = BaseContext.getCurrentId();
-        employee.setCreateUser(curId);
-        employee.setUpdateUser(curId);
+//        employee.setCreateTime(LocalDateTime.now());
+//        employee.setUpdateTime(LocalDateTime.now());
+//
+//        //设置操作用户id
+//
+//        Long curId = BaseContext.getCurrentId();
+//        employee.setCreateUser(curId);
+//        employee.setUpdateUser(curId);
 
         //插入到数据库中
         employeeMapper.save(employee);
@@ -153,10 +153,10 @@ public class EmployeeServiceImpl implements EmployeeService {
         BeanUtils.copyProperties(employeeDTO,employee);
 
 
-        employee.setUpdateUser(BaseContext.getCurrentId());
-        employee.setUpdateTime(LocalDateTime.now());
-
-        employeeMapper.updateEmployee(employee);
+//        employee.setUpdateUser(BaseContext.getCurrentId());
+//        employee.setUpdateTime(LocalDateTime.now());
+//
+//        employeeMapper.updateEmployee(employee);
 
     }
 }
