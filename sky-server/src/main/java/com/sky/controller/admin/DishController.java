@@ -97,4 +97,20 @@ public class DishController {
         dishService.updateDish(dishDTO);
         return Result.success();
     }
+
+
+    @PostMapping("/status/{status}")
+    @ApiOperation("菜品停售开售")
+    public Result stopOrStart(@PathVariable Integer status, Long id){
+        log.info("菜品目前状态：{}",status);
+        dishService.setStatus(status,id);
+        return Result.success();
+    }
+
+    @GetMapping("/list")
+    @ApiOperation("根据分类id查询菜品")
+    public Result<List<DishVO>> listByCategoryId(Long categoryId){
+        List<DishVO> dishes =  dishService.list(categoryId);
+        return Result.success(dishes);
+    }
 }

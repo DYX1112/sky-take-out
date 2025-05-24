@@ -15,13 +15,14 @@ import com.sky.mapper.SetmealDishMapper;
 import com.sky.result.PageResult;
 import com.sky.service.DishService;
 import com.sky.vo.DishVO;
+import javafx.scene.shape.PathElement;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * @Author: 杜宇翔
@@ -40,6 +41,9 @@ public class DishServiceImpl implements DishService {
 
     @Autowired
     private SetmealDishMapper setmealDishMapper;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
     /**
      * 新增菜品
      * @param dishDTO
@@ -62,7 +66,7 @@ public class DishServiceImpl implements DishService {
             });
             dishFlavorMapper.saveFlavors(flavors);
         }
-
+        delCache("dish_"+dishDTO.getCategoryId());
     }
 
     /**
@@ -114,6 +118,8 @@ public class DishServiceImpl implements DishService {
 
         //批量删除菜品关联的口味数据
         dishFlavorMapper.delDishes(ids);
+
+        delCache("dish_*");
     }
 
     /**
@@ -156,5 +162,62 @@ public class DishServiceImpl implements DishService {
             });
             dishFlavorMapper.saveFlavors(flavors);
         }
+        delCache("dish_*");
     }
+
+    /**
+     * 设置菜品状态
+     * @param status
+     * @param id
+     */
+    @Override
+    public void setStatus(Integer status, Long id) {
+        dishMapper.setStatus(status,id);
+
+        delCache("dish_*");
+    }
+
+    /**
+     * 条件查询菜品和口味
+     * @param dish
+     * @return
+     */
+    public List<DishVO> listWithFlavor(Dish dish) {
+        List<Dish> dishList = dishMapper.list(dish);
+
+        List<DishVO> dishVOList = new ArrayList<>();
+
+        for (Dish d : dishList) {
+            DishVO dishVO = new DishVO();
+            BeanUtils.copyProperties(d,dishVO);
+
+            //根据菜品id查询对应的口味
+            List<DishFlavor> flavors = dishFlavorMapper.getDishFlavorByDishId(d.getId());
+
+            dishVO.setFlavors(flavors);
+            dishVOList.add(dishVO);
+        }
+
+        return dishVOList;
+    }
+
+    /**
+     * 根据分类id查询菜品
+     * @param categoryId
+     * @return
+     */
+    @Override
+    public List<DishVO> list(Long categoryId) {
+        List<DishVO> dishes = dishMapper.listByCategoryId(categoryId);
+
+        return dishes;
+
+    }
+
+    private void delCache(String pattern){
+        Set keys = redisTemplate.keys(pattern);
+        redisTemplate.delete(keys);
+    }
+
+
 }
